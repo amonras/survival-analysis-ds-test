@@ -1,3 +1,7 @@
+"""
+Generate synthetic data for testing
+"""
+
 import argparse
 from datetime import datetime
 from pathlib import Path
@@ -21,23 +25,28 @@ def initparser():
     - s: Shrinkage rate
     :return:
     """
-    parser = argparse.ArgumentParser(description='Generate synthetic data for testing',
+    cli_parser = argparse.ArgumentParser(description='Generate synthetic data for testing',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-t', '--target',
+    cli_parser.add_argument('-t', '--target',
                         help='target path for output assets',
                         default=Path(__file__).parent.parent / "data/")
-    parser.add_argument('-n', '--n_assets', type=int, help='number of assets', default=2000)
-    parser.add_argument('-T', '--trip_duration', type=int, help='Mean Trip duration', default=100)
-    parser.add_argument('-s', '--shrinkage_rate', type=float, help='Shrinkage rate', default=0.15)
-    parser.add_argument('-r', '--replenish_rate', type=float, help='Replenishment rate', default=1)
-    parser.add_argument('-d', '--days', type=int, help='Number of days to simulate', default=2000)
+    cli_parser.add_argument('-n', '--n_assets',
+                            type=int, help='number of assets', default=2000)
+    cli_parser.add_argument('-T', '--trip_duration',
+                            type=int, help='Mean Trip duration', default=100)
+    cli_parser.add_argument('-s', '--shrinkage_rate',
+                            type=float, help='Shrinkage rate', default=0.15)
+    cli_parser.add_argument('-r', '--replenish_rate',
+                            type=float, help='Replenishment rate', default=1)
+    cli_parser.add_argument('-d', '--days',
+                            type=int, help='Number of days to simulate', default=2000)
 
-    return parser
+    return cli_parser
 
 
 def generate(
         n: int,
-        T: int,
+        T: int,  # pylint: disable=invalid-name
         shrinkage_rate: float,
         replenishment_rate: float,
         demand: pd.DataFrame
@@ -52,7 +61,8 @@ def generate(
     :param demand: Demand time series
 
     :return: A tuple of two pd.DataFrames:
-        - The first one contains the registry of all recorded trips with trip_id, crt_id, start, end and state
+        - The first one contains the registry of all recorded trips
+        with trip_id, crt_id, start, end and state
         - The second one contains the daily reports of the CRT pools
     """
 
@@ -69,7 +79,7 @@ def generate(
     )
 
     reports = []
-    for day, demand_value in tqdm(demand.iterrows(), total=len(demand)):
+    for _, demand_value in tqdm(demand.iterrows(), total=len(demand)):
         reports.append(pool.proceed(demand=int(demand_value['demand'])))
 
     # for k, v in registry.registry.items():
@@ -80,7 +90,8 @@ def generate(
 
 def generate_demand(n: int) -> pd.DataFrame:
     """
-    Generate a synthetic demand time series with weekly, monthly and yearly seasonality, plus a trend, for n days.
+    Generate a synthetic demand time series with weekly, monthly
+    and yearly seasonality, plus a trend, for n days.
     :param n: Number of days
     :return: A pd.DataFrame with a single column 'demand'
     """
@@ -94,7 +105,10 @@ def generate_demand(n: int) -> pd.DataFrame:
     monthly_amplitude = scale * np.random.randint(2, 5, size=n)
     yearly_amplitude = scale * np.random.randint(2, 20, size=n)
 
-    weekly_seasonality = weekly_amplitude * np.power(np.sin(2 * np.pi * np.arange(n) / 7 + weekly_phase), 2)
+    weekly_seasonality = weekly_amplitude * np.power(
+        np.sin(2 * np.pi * np.arange(n) / 7 + weekly_phase),
+        2
+    )
     monthly_seasonality = monthly_amplitude * np.sin(2 * np.pi * np.arange(n) / 30 + monthly_phase)
     yearly_seasonality = yearly_amplitude * np.sin(2 * np.pi * np.arange(n) / 365 + yearly_phase)
 
@@ -110,11 +124,14 @@ def generate_demand(n: int) -> pd.DataFrame:
 
 
 def main(path: Optional[Path] = None, **kwargs):
+    """
+    Main function to generate synthetic data
+    """
     if path is None:
         path = Path(__file__).parent.parent / "data"
 
     n = kwargs["n_assets"]
-    T = kwargs["trip_duration"]
+    T = kwargs["trip_duration"]  # pylint: disable=invalid-name
     shrinkage_rate = kwargs["shrinkage_rate"]
     replenishment_rate = kwargs["replenish_rate"]
     days = kwargs["days"]
@@ -138,7 +155,8 @@ def main(path: Optional[Path] = None, **kwargs):
     print(f"Total CRTs lost: {len(trips[trips['state'] == 'lost'])}")
     print(f"Final CRTs rented: {len(trips[trips['state'] == 'rented'])}")
     print(f"Final CRTs pool (home + rented): {len(trips[trips['state'].isin(['home', 'rented'])])}")
-    print(f"Average trip length: {(trips['end'] - trips['start']).mean() / pd.Timedelta(days=1):.2f} days")
+    print(f"Average trip length: "
+          f"{(trips['end'] - trips['start']).mean() / pd.Timedelta(days=1):.2f} days")
     print(f"Shrinkage Rate: {(trips['state'] == 'lost').mean():.2%}")
     print("-----------------------------------")
 

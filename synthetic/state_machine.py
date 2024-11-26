@@ -1,3 +1,8 @@
+"""
+Implements a simple state machine for a crate rental system, and a pool
+of assets that keeps track of their states and simulates their evolution
+"""
+
 import datetime
 from datetime import date
 
@@ -12,6 +17,9 @@ states = ['home', 'rented', 'lost']
 
 
 class CRT(Machine, AutoIncrement):
+    """
+    Implements a simple state machine for a crate rental system
+    """
     counter = 0
 
     def __init__(self, created_at=date, reporting_callback=None):
@@ -37,24 +45,27 @@ class CRT(Machine, AutoIncrement):
         self.id = self._id_counter
         CRT._id_counter += 1
 
-    def next(self, date: date):
+    def next(self, day: date):
         """
         Proceed to the next natural state
         """
         if self.state == 'home':
-            self.trip = Trip(crt_id=self.id, created_at=date, states=[('rented', date)])
+            self.trip = Trip(crt_id=self.id, created_at=day, states=[('rented', day)])
             self.reporting_callback(self.trip)
             self.rent()
         elif self.state == 'rented':
             # Terminate trip
-            self.trip.states.append(('home', date))
+            self.trip.states.append(('home', day))
             self.reporting_callback(self.trip)
             self.trip = None
             self.recall()
         else:
-            self.lose(date)
+            self.lose(day)
 
     def lose(self, day):
+        """
+        Trigger an asset loss on date `day`
+        """
         self.trip.states.append(('lost', day))
         self.to_lost()
 
@@ -63,7 +74,10 @@ class CRT(Machine, AutoIncrement):
 
 
 class CRTPool:
-    def __init__(
+    """
+    Implements a pool of assets that keeps track of their states and simulates their evolution
+    """
+    def __init__(  # pylint: disable=too-many-arguments, too-many-positional-arguments
             self,
             n_crates,
             mean_trip_duration,
@@ -92,12 +106,15 @@ class CRTPool:
         }
 
         # Create n instances of the CRT state machine
-        for i in range(n_crates):
+        for _ in range(n_crates):
             crt = CRT(reporting_callback=self.registry.register)
             self.state_pools[crt.state].ingress(crt.id)
             self.pool.append(crt)
 
     def proceed(self, demand: int):
+        """
+        Proceed one day in the simulation with the provided demand
+        """
         # These are the CRTs that will transition out of each pool
         requests = {
             state: self.state_pools[state].draw(demand) for state in states
@@ -110,7 +127,7 @@ class CRTPool:
                 # Randomly lose some crates
                 if np.random.rand() < self.shrinkage_rate:
                     source_pool.remove(crt.id)
-                    crt.lose(self.date)  # Will never make it back to 'incoming', trip will remain open
+                    crt.lose(self.date)  # Will never make it back to 'incoming'
                     target_pool = self.state_pools['lost']
                     target_pool.ingress(crt.id)
                     continue

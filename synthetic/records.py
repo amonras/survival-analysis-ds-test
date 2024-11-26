@@ -1,12 +1,15 @@
-import itertools
-from dataclasses import field, dataclass
-from datetime import date, datetime
+"""
+Data models for trips and a registry to keep track of them
+"""
+
+from dataclasses import dataclass
+from datetime import date
 from typing import List, Tuple
 
 import pandas as pd
 
 
-class AutoIncrement:
+class AutoIncrement:  # pylint: disable=too-few-public-methods
     """
     Implement an auto-incrementing id
     """
@@ -14,14 +17,15 @@ class AutoIncrement:
     _id_counter = 1
 
     def __post_init__(self):
-        self.id = self.__class__._id_counter
+        self.id = self.__class__._id_counter  # pylint: disable=protected-access
         self.__class__._id_counter += 1
 
 
 @dataclass
 class Trip(AutoIncrement):
     """
-    A trip contains a sequence of state transitions, from the moment a CRT goes out until it comes back in
+    A trip contains a sequence of state transitions, from the moment a
+    CRT goes out until it comes back in
     """
     crt_id: int
     created_at: date
@@ -36,6 +40,9 @@ class Registry:
         self.registry = {}
 
     def register(self, trip: Trip):
+        """
+        Register a trip in the registry
+        """
         self.registry[trip.id] = trip
 
     def __getitem__(self, item):
