@@ -2,6 +2,7 @@ DATA_DIR = data
 
 setup:
 	pip install -r requirements.txt
+	python -m ipykernel install --user --name amonras-ifco
 
 test: setup
 	python -m pytest test
