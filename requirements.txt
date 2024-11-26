@@ -8,3 +8,4 @@ fastparquet
 jupyter
 ipykernel
 scikit-learn
+pylint
