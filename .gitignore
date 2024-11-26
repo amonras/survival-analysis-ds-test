@@ -1,0 +1,6 @@
+chatgpt-solution.md
+.ipynb_checkpoints/
+.python-version
+.idea/
+__pycache__/
+data/
