@@ -14,7 +14,7 @@ run the following command:
 ```sh
 make setup
 ```
-This will install the required dependencies listed in requirements.txt.
+This will install the required dependencies listed in `requirements.txt` and register the current python environment to jupyter as `amonras-ifco`.
 
 ## Running the tests
 To run the tests, run the following command:
@@ -32,7 +32,7 @@ make generate
 ### The `synthetic.generate` Command Line Interface
 Alternatively, you can run use the `synthetic.generate` CLI to generate synthetic data with specific settings
 ```sh
-python -m synthetic.generate --help
+$ python -m synthetic.generate --help
 usage: generate.py [-h] [-t TARGET] [-n N_ASSETS] [-T TRIP_DURATION] [-s SHRINKAGE_RATE] [-r REPLENISH_RATE] [-d DAYS]
 
 Generate synthetic data for testing
@@ -66,4 +66,4 @@ DATA=your_data_path jupyter notebook Model.ipynb
 ```
 
 ## Requirements
-This code has been tested with python 3.12.
+This code has been tested with python 3.12. Using a virtual environment is strongly encouraged.
