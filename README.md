@@ -5,6 +5,7 @@ This repo contains the following parts:
 - `synthetic/`: Python module to generate synthetic data
 - `test/`: Unit tests for the synthetic module
 - `Makefile`: Makefile to run the tests and setup the project
+- `IFCO Presentation.pdf`: Presentation with the explanation of my approach
 
 ## Setup
 
@@ -14,14 +15,15 @@ run the following command:
 ```sh
 make setup
 ```
-This will install the required dependencies listed in `requirements.txt` and register the current python environment to jupyter as `amonras-ifco`.
+This will install the required dependencies listed in `requirements.txt` and register the current python 
+environment to jupyter as `amonras-ifco`, so that the notebook can be executed without further setup.
 
 ## Running the tests
-To run the tests, run the following command:
+To run the unit tests, run the following command:
 ```sh
 make test
 ```
-This will ensure that your environment is operational and that the synthetic module is working as expected.
+This will ensure that your environment is operational and that the synthetic data generation module is working as expected.
 
 ## Generating synthetic data
 To generate synthetic data, run the following command:
@@ -30,7 +32,7 @@ make generate
 ```
 
 ### The `synthetic.generate` Command Line Interface
-Alternatively, you can run use the `synthetic.generate` CLI to generate synthetic data with specific settings
+Alternatively, you can use the `synthetic.generate` CLI to generate synthetic data with specific settings
 ```sh
 $ python -m synthetic.generate --help
 usage: generate.py [-h] [-t TARGET] [-n N_ASSETS] [-T TRIP_DURATION] [-s SHRINKAGE_RATE] [-r REPLENISH_RATE] [-d DAYS]
@@ -40,7 +42,7 @@ Generate synthetic data for testing
 options:
   -h, --help            show this help message and exit
   -t TARGET, --target TARGET
-                        target path for output assets (default: /Users/amonras/Projects/IFCO-ds-test/data)
+                        target path for output assets (default: ./data)
   -n N_ASSETS, --n_assets N_ASSETS
                         number of assets (default: 2000)
   -T TRIP_DURATION, --trip_duration TRIP_DURATION
