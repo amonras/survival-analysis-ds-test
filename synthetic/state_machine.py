@@ -2,11 +2,10 @@ import datetime
 from datetime import date
 
 import numpy as np
-import pandas as pd
 
 from transitions import Machine
 
-from synthetic.pool_sampling import Scrambling, FIFO, LIFO, ConstantDelay, Sink, Poisson, LogNormal
+from synthetic.pool_sampling import FIFO, Sink, LogNormal
 from synthetic.records import AutoIncrement, Trip, Registry
 
 states = ['home', 'rented', 'lost']

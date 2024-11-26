@@ -110,8 +110,6 @@ class Scrambling(PoolSampling):
         return np.random.choice(self.pool, n)
 
 
-
-
 class LIFO(PoolSampling):
     """
     Implements a pool such that elements are drawn according to a Last-In-First-Out policy
@@ -122,39 +120,6 @@ class LIFO(PoolSampling):
 
     def draw(self, n: Optional[int]):
         drawn = self.pool[len(self.pool) - n:] if n <= len(self.pool) else self.pool
-        return drawn
-
-
-class ConstantDelay(PoolSampling):
-    """
-    Implements a pool such that elements are drawn deterministically after a number of steps
-    """
-
-    def __init__(self, k):
-        super().__init__()
-        self.pool = {}
-        self.k = k
-
-    def ingress(self, id: int):
-        # initialize the counter for each element
-        self.pool[id] = self.k
-
-    def egress(self, id: int):
-        # remove id from pool
-        self.pool.pop(id)
-
-    def draw(self, n: Optional[int]):
-        # *******************************
-        # *** Ignores the parameter n ***
-        # *******************************
-
-        # Return list of elements that are due to transition
-        drawn = [id for id, steps in self.pool.items() if steps == 0]
-
-        # update the counter for each element
-        for id in self.pool:
-            self.pool[id] -= 1
-
         return drawn
 
 
@@ -202,36 +167,3 @@ class Sink(PoolSampling):
 
     def draw(self, n: Optional[int]):
         return []
-
-
-class ConstantDelay(PoolSampling):
-    """
-    Implements a pool such that elements are drawn deterministically after a number of steps
-    """
-
-    def __init__(self, k):
-        super().__init__()
-        self.pool = {}
-        self.k = k
-
-    def ingress(self, id: int):
-        # initialize the counter for each element
-        self.pool[id] = self.k
-
-    def egress(self, id: int):
-        # remove id from pool
-        self.pool.pop(id)
-
-    def draw(self, n: Optional[int]):
-        # *******************************
-        # *** Ignores the parameter n ***
-        # *******************************
-
-        # Return list of elements that are due to transition
-        drawn = [id for id, steps in self.pool.items() if steps == 0]
-
-        # update the counter for each element
-        for id in self.pool:
-            self.pool[id] -= 1
-
-        return drawn
