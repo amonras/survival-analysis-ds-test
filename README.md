@@ -52,7 +52,7 @@ options:
   -d DAYS, --days DAYS  Number of days to simulate (default: 2000)
 ```
 
-## Open the notebook
+## Opening the notebook
 To open the notebook, run the following command:
 ```sh
 make notebook
@@ -65,3 +65,5 @@ If you want to open the notebook to use a different set of synthetic data, pass 
 DATA=your_data_path jupyter notebook Model.ipynb
 ```
 
+## Requirements
+This code has been tested with python 3.12.
