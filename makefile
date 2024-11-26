@@ -6,6 +6,7 @@ setup:
 
 test: setup
 	python -m pytest test
+	pylint synthetic
 
 generate: setup
 	mkdir -p $(DATA_DIR)

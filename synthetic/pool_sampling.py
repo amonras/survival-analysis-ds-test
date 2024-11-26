@@ -1,3 +1,7 @@
+"""
+Implements different pool sampling strategies
+"""
+
 from typing import Optional
 
 import numpy as np
@@ -11,31 +15,31 @@ class PoolSampling:
     def __init__(self):
         self.pool = np.array([], dtype=int)
 
-    def ingress(self, id: int):
+    def ingress(self, idx: int):
         """
         Add element to the pool
         """
-        self.pool = np.append(self.pool, id)
+        self.pool = np.append(self.pool, idx)
 
-    def egress(self, id: int):
+    def egress(self, idx: int):
         """
         Removed from the pool
         """
         # remove id from pool
-        self.pool = self.pool[self.pool != id]
+        self.pool = self.pool[self.pool != idx]
 
-    def remove(self, id: int):
+    def remove(self, idx: int):
         """
         Remove an element from the pool, regardless of its due time
         """
-        self.egress(id)
+        self.egress(idx)
 
     def draw(self, n: Optional[int]):
         """
-        Draw n elements from the pool, according to the specific logic. Some implementations may ignore the parameter n,
+        Draw n elements from the pool, according to the specific logic.
+        Some implementations may ignore the parameter n,
         and return a different number of elements according to their own logic
         """
-        pass
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.pool})"
@@ -51,7 +55,9 @@ class Poisson(PoolSampling):
         self.rate = rate
 
     def draw(self, n: Optional[int]):
-        drawn = np.random.choice([True, False], p=[self.rate, 1-self.rate], size=len(self.pool), replace=True)
+        drawn = np.random.choice([True, False],
+                                 p=[self.rate, 1 - self.rate],
+                                 size=len(self.pool), replace=True)
         return self.pool[drawn]
 
 
@@ -66,20 +72,20 @@ class LogNormal(PoolSampling):
         self.mean = mean
         self.std = std
 
-    def ingress(self, id: int):
+    def ingress(self, idx: int):
         # initialize the counter for each element
         # Draw the number of steps from a Log-Normal distribution
         n = np.log(np.random.lognormal(self.mean, self.std))
 
-        self.pool[id] = n
+        self.pool[idx] = n
 
-    def egress(self, id: int):
+    def egress(self, idx: int):
         # remove id from pool
-        self.pool.pop(id)
+        self.pool.pop(idx)
 
-    def remove(self, id: int):
+    def remove(self, idx: int):
         # remove id from pool
-        self.pool.pop(id)
+        self.pool.pop(idx)
 
     def draw(self, n: Optional[int]):
         # *******************************
@@ -90,19 +96,17 @@ class LogNormal(PoolSampling):
         drawn = [id for id, steps in self.pool.items() if steps < 0]
 
         # update the counter for each element
-        for id in self.pool:
-            self.pool[id] -= 1
+        for idx in self.pool:
+            self.pool[idx] -= 1
 
         return drawn
 
 
 class Scrambling(PoolSampling):
     """
-    Implements a scrambling pool where elements are drawn randomly, irrespectively of the order they enter the pool
+    Implements a scrambling pool where elements are drawn randomly,
+    irrespectively of the order they enter the pool
     """
-
-    def __init__(self):
-        super().__init__()
 
     def draw(self, n: Optional[int]):
         if n > len(self.pool):
@@ -110,51 +114,13 @@ class Scrambling(PoolSampling):
         return np.random.choice(self.pool, n)
 
 
-
-
 class LIFO(PoolSampling):
     """
     Implements a pool such that elements are drawn according to a Last-In-First-Out policy
     """
 
-    def __init__(self):
-        super().__init__()
-
     def draw(self, n: Optional[int]):
         drawn = self.pool[len(self.pool) - n:] if n <= len(self.pool) else self.pool
-        return drawn
-
-
-class ConstantDelay(PoolSampling):
-    """
-    Implements a pool such that elements are drawn deterministically after a number of steps
-    """
-
-    def __init__(self, k):
-        super().__init__()
-        self.pool = {}
-        self.k = k
-
-    def ingress(self, id: int):
-        # initialize the counter for each element
-        self.pool[id] = self.k
-
-    def egress(self, id: int):
-        # remove id from pool
-        self.pool.pop(id)
-
-    def draw(self, n: Optional[int]):
-        # *******************************
-        # *** Ignores the parameter n ***
-        # *******************************
-
-        # Return list of elements that are due to transition
-        drawn = [id for id, steps in self.pool.items() if steps == 0]
-
-        # update the counter for each element
-        for id in self.pool:
-            self.pool[id] -= 1
-
         return drawn
 
 
@@ -163,21 +129,22 @@ class FIFO(PoolSampling):
     Implements a pool such that elements are drawn according to a First-In-First-Out policy,
     but only after a given delay
     """
+
     def __init__(self, delay=0):
         super().__init__()
         self.pool = {k: np.array([]) for k in range(delay + 1)}
         self.delay = delay
 
-    def ingress(self, id: int):
-        self.pool[self.delay] = np.append(self.pool[self.delay], id)
+    def ingress(self, idx: int):
+        self.pool[self.delay] = np.append(self.pool[self.delay], idx)
 
-    def egress(self, id: int):
-        assert id in self.pool[0], f"Element {id} is not due to egress"
-        self.pool[0] = self.pool[0][self.pool[0] != id]
+    def egress(self, idx: int):
+        assert idx in self.pool[0], f"Element {idx} is not due to egress"
+        self.pool[0] = self.pool[0][self.pool[0] != idx]
 
-    def remove(self, id: int):
+    def remove(self, idx: int):
         for k in range(self.delay + 1):
-            self.pool[k] = self.pool[k][self.pool[k] != id]
+            self.pool[k] = self.pool[k][self.pool[k] != idx]
 
     def draw(self, n: Optional[int]):
         drawn = self.pool[0][:n] if n <= len(self.pool[0]) else self.pool[0]
@@ -197,41 +164,5 @@ class Sink(PoolSampling):
     Implements a pool such that elements are never drawn
     """
 
-    def __init__(self):
-        super().__init__()
-
     def draw(self, n: Optional[int]):
         return []
-
-
-class ConstantDelay(PoolSampling):
-    """
-    Implements a pool such that elements are drawn deterministically after a number of steps
-    """
-
-    def __init__(self, k):
-        super().__init__()
-        self.pool = {}
-        self.k = k
-
-    def ingress(self, id: int):
-        # initialize the counter for each element
-        self.pool[id] = self.k
-
-    def egress(self, id: int):
-        # remove id from pool
-        self.pool.pop(id)
-
-    def draw(self, n: Optional[int]):
-        # *******************************
-        # *** Ignores the parameter n ***
-        # *******************************
-
-        # Return list of elements that are due to transition
-        drawn = [id for id, steps in self.pool.items() if steps == 0]
-
-        # update the counter for each element
-        for id in self.pool:
-            self.pool[id] -= 1
-
-        return drawn
