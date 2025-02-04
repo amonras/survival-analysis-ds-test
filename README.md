@@ -1,4 +1,4 @@
-# IFCO Data Science Test Assignment
+# Survival Analysis Data Science Test Assignment
 
 This repo contains the following parts:
 - `Model.ipynb`: Jupyter notebook with the model and the explanation
