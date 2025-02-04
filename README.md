@@ -5,7 +5,7 @@ This repo contains the following parts:
 - `synthetic/`: Python module to generate synthetic data
 - `test/`: Unit tests for the synthetic module
 - `Makefile`: Makefile to run the tests and setup the project
-- `IFCO Presentation.pptx`: Presentation with the explanation of my approach
+- `Presentation.pptx`: Presentation with the explanation of my approach
 
 ## Setup
 
